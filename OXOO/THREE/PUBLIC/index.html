@@ -1,0 +1,375 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+<meta charset="UTF-8" /> 
+     <title>OXXO</title>
+      <link rel="icon" type="image/x-icon" href="./REF/oxlo.png">
+     <style>
+     </style>
+</head>
+<body>
+<canvas id="myCanvas">
+    <!--El elemento HTML canvas se puede utilizar para dibujar gráficos a través de 
+        secuencias de comandos (por lo general JavaScript ).-->
+</canvas>
+<script type="importmap"> 
+    {
+        "imports":{
+            "three": "./js/three.module.js",
+            "three/OrbitControls": "./js/OrbitControls.js" 
+        }
+}
+</script>
+<script type="module"> 
+    //👉🏽 Mandar llamar a la librería
+    import * as THREE from 'three'; 
+    import {OrbitControls} from 'three/OrbitControls';
+    console.log(OrbitControls);
+    import * as CANNON from './js/cannon-es.js';
+    import CannonDebugger from './js/cannon-es-debugger.js'
+    import {RoundedBoxGeometry} from "./js/RoundedBoxGeometry.js"
+
+    //👉🏽 Renderer - Realiza una conexión entre el código y el canvas
+    var renderer = new THREE.WebGLRenderer({canvas: document.getElementById('myCanvas'),antialias: true});
+    renderer.setPixelRatio(window.decivePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x034959);
+
+    //🎬 Creando nueva escena 
+    var scene = new THREE.Scene();
+
+    //🎥 Agregar una cámara de perspectiva
+    var camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 5000);
+    scene.add(camera);
+
+    //👉🏽Settings de la cámara
+    camera.position.set(0, 4, 25);
+
+    //👉🏽Añadiendo los OrbitControls
+    var controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
+//gridhelper
+var gridhelper= new THREE.GridHelper(40,30,4,2);
+//scene.add(gridhelper);
+var axesHelper=new THREE.AxesHelper(50);
+//scene.add(axesHelper);
+//AÑADIR EL MUNDO
+const world = new CANNON.World();
+world.gravity.set(0, -9.82, 0); // Gravedad usando cannon
+const cannonDebug = new CannonDebugger(scene, world); ///////// se genera un debugger que permite "ver" las aristas de las geometrias usadas en el cannon (un helper)
+
+var polarHelper=new THREE.PolarGridHelper(50,16,20,30);
+//scene.add(polarHelper) //cordenadas polares
+
+//CANON     PISO PROPIEDADES
+const groundBody = new CANNON.Body({ 
+type: CANNON.Body.STATIC,
+shape: new CANNON.Plane(),
+});
+groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);/// elplano aparece vertical, asíq ue hay que girarlo para que quede acostado
+groundBody.position.y=0;
+//world.addBody(groundBody);//////////////////////////////////////// configuración del mundo cannon
+
+
+//luces
+var light = new THREE.PointLight(0x1BB3FF, 2.0, 200);
+light.castShadow = true;
+light.shadow.bias = 0.0001;
+light.shadow.mapSize.width = 2048 * 2;
+light.shadow.mapSize.height = 2048 * 2;
+light.position.set(60, 60, 10);
+var light2 = new THREE.AmbientLight(0xffffff, .3);
+scene.add(light, light2); //////////////////////////////// luces
+
+
+    // 🪄🪄 SECCIÓN DE CÓDIGO 🪄🪄
+    //BASE PARA REFERENCIA 
+    // frente imagen
+var plano = new THREE.PlaneGeometry(24, 7);
+var texturalapida1= new THREE.TextureLoader().load("./REF/oxxx.png");
+var materialLapida = new THREE.MeshLambertMaterial({map:texturalapida1,transparent:true,side: THREE.DoubleSide, opacity:0.7});
+var plane1 = new THREE.Mesh(plano, materialLapida);
+plane1.position.set(0,3.5,0);
+scene.add(plane1);
+
+
+//OXXO
+//TECHO
+var cuerpomic = new THREE.BoxGeometry(28, 5, 11.2); 
+var cuerpoMat = new THREE.MeshStandardMaterial({color: 0xba2930,side: THREE.DoubleSide});
+var cuerpo1 = new THREE.Mesh(cuerpomic, cuerpoMat);
+scene.add(cuerpo1);
+cuerpo1.position.set(0, 11, 0);
+
+//LETRERO
+var box = new THREE.BoxGeometry(8, 4, 1); 
+var box1 = new THREE.BoxGeometry(6, 3, 1); 
+var box2 = new THREE.BoxGeometry(6, .5, 1); 
+var box3 = new THREE.BoxGeometry(6, .2, 1); 
+var mesh1 = new THREE.MeshStandardMaterial({color: 0x9e9e9e,side: THREE.DoubleSide});
+var mesh2 = new THREE.MeshStandardMaterial({color: 0xba2930,side: THREE.DoubleSide});
+var mesh3 = new THREE.MeshStandardMaterial({color: 0xdb8a05,side: THREE.DoubleSide});
+var letrero1 = new THREE.Mesh(box, mesh1);
+var letrero2 = new THREE.Mesh(box1, mesh2);
+var letrero3 = new THREE.Mesh(box2, mesh3);
+var letrero4 = new THREE.Mesh(box2, mesh3);
+var letrero5 = new THREE.Mesh(box3, mesh1);
+var letrero6 = new THREE.Mesh(box3, mesh1);
+//scene.add(letrero1);
+//scene.add(letrero2);
+//scene.add(letrero3);
+//scene.add(letrero4);
+//scene.add(letrero5);
+//scene.add(letrero6);
+letrero1.position.set(-5, 11, 6);
+letrero2.position.set(-5, 11, 6.5);
+letrero3.position.set(-5, 12.3, 6.7);
+letrero5.position.set(-5, 12, 6.7);
+letrero6.position.set(-5, 10, 6.7);
+letrero4.position.set(-5, 9.6, 6.7);
+
+//LETRAS OXXO
+// O 
+var letO = new THREE.TorusGeometry(0.6, 0.2, 16, 100); 
+var letme = new THREE.MeshStandardMaterial({color: 0xffffff});
+var letraO = new THREE.Mesh(letO, letme);
+var letraO2 = new THREE.Mesh(letO, letme);
+//scene.add(letraO);
+//scene.add(letraO2);
+letraO.position.set(-7.3, 11, 7); 
+letraO2.position.set(-3, 11, 7); 
+// X
+var letX1 = new THREE.BoxGeometry(0.2, 1.6, 0.3);
+var letrax1 = new THREE.Mesh(letX1, letme);
+var letrax2 = new THREE.Mesh(letX1, letme);
+var letrax12 = new THREE.Mesh(letX1, letme);
+var letrax22 = new THREE.Mesh(letX1, letme);
+//scene.add(letrax1);
+//scene.add(letrax2);
+//scene.add(letrax12);
+//scene.add(letrax22);
+letrax1.position.set(-5.7, 11, 7);
+letrax2.position.set(-5.7, 11, 7);
+letrax12.position.set(-4.4, 11, 7);
+letrax22.position.set(-4.4, 11, 7);
+letrax1.rotation.z = Math.PI / 4;
+letrax2.rotation.z = -Math.PI / 4;
+letrax12.rotation.z = Math.PI / 4;
+letrax22.rotation.z = -Math.PI / 4;
+
+//AGRUPACION LETRERO
+var letreroxxo = new THREE.Group();
+letreroxxo.add(letrero1,letrero2,letrero3,letrero4,letrero5,letrero6
+, letraO, letraO2,letrax1,letrax2,letrax12,letrax22);   
+
+scene.add(letreroxxo);
+letreroxxo.position.set(0, 0, 0);
+
+//ANUNCIO OXO
+var letreroxxo2 = letreroxxo.clone();
+var pos = new THREE.CylinderGeometry(.5,.5,20,32);
+var poste = new THREE.Mesh(pos, pisso);
+scene.add(letreroxxo2);
+scene.add(poste);
+letreroxxo2.position.set(-25,5,12);
+poste.position.set(-16,10,20);
+letreroxxo2.rotation.y = Math.PI / 2;
+letreroxxo2.scale.set (1.5,1.5,1.5);
+
+//PISO OXXO
+var pis = new THREE.BoxGeometry(28, .1, 16); 
+var pisso = new THREE.MeshStandardMaterial({color: 0x23282b,side: THREE.DoubleSide});
+var piso = new THREE.Mesh(pis, pisso);
+scene.add(piso);
+piso.position.set(0, 0, 2);
+
+//PISO ESTA
+var pise = new THREE.BoxGeometry(35, .01, 35); 
+var pissoe = new THREE.MeshStandardMaterial({color: 0x666666,side: THREE.DoubleSide});
+var pisoe = new THREE.Mesh(pise, pissoe);
+scene.add(pisoe);
+pisoe.position.set(0, 0, 8);
+
+//BANQUETA
+var pis1 = new THREE.BoxGeometry(28, .3, .5); //banq del ox
+var pis12 = new THREE.BoxGeometry(28.5, .3, .5); //banq atras ox
+var pis2 = new THREE.BoxGeometry(.5, .3, 12); //banquelat izq ox
+var pis3 = new THREE.BoxGeometry(.5, .3, 16.5); //banquelat der ox
+var pise1 = new THREE.BoxGeometry(25, .3, .5); //banq del est
+var pise2 = new THREE.BoxGeometry(34, .3, .5); //banq atras est
+var pise3 = new THREE.BoxGeometry(.5, .3, 35.5); //banquelat izq ox
+var pise31 = new THREE.BoxGeometry(.5, .1, 8); //separacion est
+var pisso1 = new THREE.MeshStandardMaterial({color: 0xffc340,side: THREE.DoubleSide});
+var pissoe1 = new THREE.MeshStandardMaterial({color: 0xeeeeee,side: THREE.DoubleSide});
+var piso1 = new THREE.Mesh(pis1, pisso1);
+var piso2 = new THREE.Mesh(pis2, pisso1);
+var piso3 = new THREE.Mesh(pis3, pisso1);
+var piso12 = new THREE.Mesh(pis12, pisso1);
+var pisoe1 = new THREE.Mesh(pise1, pissoe1);
+var pisoe2 = new THREE.Mesh(pise2, pissoe1);
+var pisoe3 = new THREE.Mesh(pise3, pissoe1);
+var pisoe4 = new THREE.Mesh(pise3, pissoe1);
+var sep1 = new THREE.Mesh(pise31, pissoe1);
+var sep2 = new THREE.Mesh(pise31, pissoe1);
+var sep3 = new THREE.Mesh(pise31, pissoe1);
+var sep4 = new THREE.Mesh(pise31, pissoe1);
+var sep5 = new THREE.Mesh(pise31, pissoe1);
+scene.add(piso1);
+scene.add(piso2);
+scene.add(piso3);
+scene.add(piso12);
+scene.add(pisoe1);
+scene.add(pisoe2);
+scene.add(pisoe3);
+scene.add(pisoe4);
+scene.add(sep1);
+scene.add(sep2);
+scene.add(sep3);
+scene.add(sep4);
+scene.add(sep5);
+piso1.position.set(0, .1, 10);
+piso12.position.set(0, .1, -6);
+piso2.position.set(-14, .1, 0);
+piso3.position.set(14, .1, 2);
+pisoe1.position.set(-4.5, .1, 25.5);
+pisoe2.position.set(0, .1, -9.5);
+pisoe3.position.set(17.2, .1, 8);
+pisoe4.position.set(-17.2, .1, 8);
+sep1.position.set(-13.7, .1, 14);
+sep2.position.set(-6, .1, 14);
+sep3.position.set(0, .1, 14);
+sep4.position.set(6, .1, 14);
+sep5.position.set(14, .1, 14);
+
+//TECHO bajo
+var cuerpomic1 = new THREE.BoxGeometry(28, 2, 11.2); 
+var cuerpoMat1 = new THREE.MeshStandardMaterial({color: 0xdb8a05,side: THREE.DoubleSide});
+var cuerpo3 = new THREE.Mesh(cuerpomic1, cuerpoMat1);
+scene.add(cuerpo3);
+cuerpo3.position.set(0, 7, 0);
+
+//CUERPO
+var cuerpoox = new THREE.BoxGeometry(24, 5, 9.2); 
+var cuerpoMato = new THREE.MeshStandardMaterial({color: 0x676966,side: THREE.DoubleSide});
+var cuerpo2 = new THREE.Mesh(cuerpoox, cuerpoMato);
+scene.add(cuerpo2);
+cuerpo2.position.set(0, 8, 0);
+
+//CASTILLOS
+var cas = new THREE.BoxGeometry(1, 6, 1); 
+var cas1 = new THREE.BoxGeometry(9, 6, 1);
+var cas2 = new THREE.BoxGeometry(5, 2, 1);
+var cast = new THREE.MeshStandardMaterial({color: 0x676966,side: THREE.DoubleSide});
+var cuerpo4 = new THREE.Mesh(cas, cast);
+var cuerpo5 = new THREE.Mesh(cas, cast);
+var cuerpo6 = new THREE.Mesh(cas, cast);
+var cuerpo7 = new THREE.Mesh(cas1, cast);
+var cuerpo8 = new THREE.Mesh(cas2, cast);
+scene.add(cuerpo4);
+scene.add(cuerpo5);
+scene.add(cuerpo6);
+scene.add(cuerpo7);
+scene.add(cuerpo8);
+cuerpo4.position.set(-11.5, 3, 4.1);
+cuerpo5.position.set(-6.5, 3, 4.1);
+cuerpo6.position.set(-2, 3, 4.1);
+cuerpo7.position.set(7.5, 3, 4.1);
+cuerpo8.position.set(1, 5.5, 4.1);
+//PAREDES
+var cas3 = new THREE.BoxGeometry(9.3, 6, 1);
+var cas4 = new THREE.BoxGeometry(24, 6, .2);
+var cuerpo9 = new THREE.Mesh(cas3, cast);
+var cuerpo10 = new THREE.Mesh(cas, cast);
+var cuerpo11 = new THREE.Mesh(cas, cast);
+var cuerpo12 = new THREE.Mesh(cas4, cast);
+scene.add(cuerpo9);
+scene.add(cuerpo10);
+scene.add(cuerpo11);
+scene.add(cuerpo12);
+cuerpo9.position.set(-11.5, 3, 0);
+cuerpo9.rotation.y = Math.PI / 2;
+cuerpo10.position.set(11.5, 3, 0);
+cuerpo10.rotation.y = Math.PI / 2;
+cuerpo11.position.set(11.5, 3, -4.1);
+cuerpo11.rotation.y = Math.PI / 2;
+cuerpo12.position.set(0, 3, -4.5);
+
+//VIDRIOS
+var cas5 = new THREE.BoxGeometry(24, 6, .2);
+var cas6 = new THREE.BoxGeometry(9.3, 6, .2);
+var cast1 = new THREE.MeshStandardMaterial({color: 0x676966, transparent:true,side: THREE.DoubleSide, opacity:0.2});
+var cuerpo13 = new THREE.Mesh(cas5, cast1);
+var cuerpo13 = new THREE.Mesh(cas5, cast1);
+var cuerpo14 = new THREE.Mesh(cas6, cast1);
+scene.add(cuerpo13);
+scene.add(cuerpo14);
+cuerpo13.position.set(0, 3, 4.5);
+cuerpo14.position.set(11.7, 3, 0);
+cuerpo14.rotation.y = Math.PI / 2;
+
+//LUCES
+var lightf = new THREE.PointLight(0xffc340, 1, 100);
+lightf.position.set(0, 0, 0);
+scene.add(lightf);
+
+
+//OTROS
+//RELOJ PARA LUCES
+var clock = new THREE.Clock();
+var velocidad = 3;
+var velocidadf = 5;
+var amplitud = 0.8;
+
+
+function carrito_movimiento_sin() {
+    carrito.position.y = Math.sin(clock.getElapsedTime() * velocidad) * amplitud;
+}
+ 
+function luces_focos() {
+
+    lightf.intensity = (Math.cos(clock.getElapsedTime() * velocidadf) * 1) + 0.5;
+    
+    letme.opacity = (Math.cos(clock.getElapsedTime() * velocidadf) * -0.5) + 3;
+}
+ 
+
+//canon masa al objeto
+const boxbody = new CANNON.Body({ 
+mass: 1,
+position:new CANNON.Vec3(0,20,0),
+//shape: new CANNON.Box(new CANNON.Vec3(13,5,5))
+});
+world.addBody(boxbody); ///////////////// cuerpo "fisico" de la caja
+
+//////////////////////////////////////////////////////aplicamos las propiedades fisicas a las geometrias 
+/////////////////////////////////////////////////////////////////////////Los cuaterniones en física representan
+// rotaciones en el espacio, véase cuaterniones y rotación en el espacio. Además tienen aplicaciones en el electromagnetismo y la mecánica cuántica. 
+//se utilizan a menudo en gráficos por computadora (y en el análisis geométrico asociado) para representar 
+// la orientación de un objeto en un espacio tridimensional. Las ventajas son: conforman una representación 
+// no singular (comparada con, por ejemplo, los ángulos de Euler), más compacta y más rápida que las matrices, 
+// en términos computacionales. Debido a lo expuesto, es común el uso de esta notación en el campo de la robótica, 
+// debido a que permite en ciertas situaciones, mediante cuaterniones unitarios, abstraer rotaciones y traslaciones 
+// con cierta simplicidad, permitiendo la obtención de la orientación relativa entre sistemas de coordenadas.
+
+
+      //🎰🎰Rendering y animación
+      requestAnimationFrame(render);
+      function render() {
+        luces_focos()
+      //🪄🪄 Animación
+  //world.fixedStep();
+  
+  cannonDebug.update(); ///////////se actualiza la visualización del debugger
+
+world.step(1 / 60); // Actualizar el mundo físico
+      controls.update();
+
+      //Llamado para renderizar y volver a llamar a la misma función (render)
+      renderer.render(scene, camera);
+      requestAnimationFrame(render);
+      }
+</script>
+</body>
+</html>
